@@ -31,6 +31,12 @@ class TestCase #if mt_build implements mt.Protect, #end implements haxe.Public  
 	public function new( ) {
 	}
 
+  public function beforeAll() : Void {
+  }
+
+  public function afterAll() : Void {
+  }
+
 	public function setup() : Void {
 	}
 
@@ -40,6 +46,18 @@ class TestCase #if mt_build implements mt.Protect, #end implements haxe.Public  
 	function print( v : Dynamic ) {
 		haxe.unit.TestRunner.print(v);
 	}
+
+  function assertThrows( f: Void -> Void ) : Void {
+    var didThrow:Bool = false;
+
+    try {
+      f();
+    } catch (ex: String) {
+      didThrow = true;
+    }
+
+    assertTrue(didThrow);
+  }
 
 	function assertTrue( b:Bool, ?c : PosInfos ) : Void {
 		currentTest.done = true;
@@ -65,7 +83,7 @@ class TestCase #if mt_build implements mt.Protect, #end implements haxe.Public  
 		currentTest.done = true;
 		if (actual != expected){
 			currentTest.success = false;
-			currentTest.error   = "expected '" + expected + "' but was '" + actual + "'";
+			currentTest.error   = "left side: '" + expected + "' right side: '" + actual + "'";
 			currentTest.posInfos = c;
 			throw currentTest;
 		}

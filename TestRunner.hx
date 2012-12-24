@@ -39,9 +39,9 @@ class TestRunner {
 		#if flash9
 			if( tf == null ) {
 				tf = new flash.text.TextField();
-				tf.selectable = false;
 				tf.width = flash.Lib.current.stage.stageWidth;
 				tf.autoSize = flash.text.TextFieldAutoSize.LEFT;
+				tf.wordWrap = true;
 				flash.Lib.current.addChild(tf);
 			}
 			tf.appendText(v);
@@ -50,7 +50,6 @@ class TestRunner {
 			if( tf == null ) {
 				root.createTextField("__tf",1048500,0,0,flash.Stage.width,flash.Stage.height+30);
 				tf = root.__tf;
-				tf.selectable = false;
 				tf.wordWrap = true;
 			}
 			var s = flash.Boot.__string_rec(v,"");
@@ -112,6 +111,7 @@ class TestRunner {
 		var fields = Type.getInstanceFields(cl);
 
 		print( "Class: "+Type.getClassName(cl)+" ");
+
 		for ( f in fields ){
 			var fname = f;
 			var field = Reflect.field(t, f);
