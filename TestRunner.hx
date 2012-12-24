@@ -35,7 +35,11 @@ class TestRunner {
 	static var tf : flash.TextField = null;
 #end
 
-	public static dynamic function print( v : Dynamic ) untyped {
+	public static dynamic function print( v : Dynamic, color : Bool = false ) untyped {
+
+    var redTextFormat: flash.text.TextFormat = new flash.text.TextFormat();
+    redTextFormat.color = 0x0000FF;
+
 		#if flash9
 			if( tf == null ) {
 				tf = new flash.text.TextField();
@@ -44,7 +48,17 @@ class TestRunner {
 				tf.wordWrap = true;
 				flash.Lib.current.addChild(tf);
 			}
-			tf.appendText(v);
+
+      if (color) {
+        var oldSize : Int = tf.length;
+        tf.appendText(v);
+        var newSize : Int = tf.length;
+
+        tf.setTextFormat(redTextFormat, oldSize, newSize);
+      } else {
+        tf.appendText(v);
+      }
+
 		#elseif flash
 			var root = flash.Lib.current;
 			if( tf == null ) {
@@ -82,7 +96,7 @@ class TestRunner {
 	}
 
 	private static function customTrace( v, ?p : haxe.PosInfos ) {
-		print(p.fileName+":"+p.lineNumber+": "+Std.string(v)+"\n");
+		print(p.fileName+":"+p.lineNumber+": "+Std.string(v)+"\n", true);
 	}
 
 	public function new() {
