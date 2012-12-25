@@ -10,3 +10,4 @@ This is the Haxe unit testing framework, with some improvements.
 * adds `assertThrows`
 * adds `assertDoesNotThrow`
 * adds `assertDotEquals` (same as `assertEquals`, but does comparisons with .equals() rather than ==)
+* adds `assertNotDotEquals`
