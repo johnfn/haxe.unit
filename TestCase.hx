@@ -47,6 +47,8 @@ class TestCase #if mt_build implements mt.Protect, #end implements haxe.Public  
 		haxe.unit.TestRunner.print(v);
 	}
 
+  //TODO: could use macros here to not have to pass in functions... :3 
+
   function assertThrows( f: Void -> Void ) : Void {
     var didThrow:Bool = false;
 
@@ -57,6 +59,18 @@ class TestCase #if mt_build implements mt.Protect, #end implements haxe.Public  
     }
 
     assertTrue(didThrow);
+  }
+
+  function assertDoesNotThrow( f: Void -> Void ) : Void {
+    var didThrow:Bool = false;
+
+    try {
+      f();
+    } catch (ex: String) {
+      didThrow = true;
+    }
+
+    assertTrue(!didThrow);
   }
 
 	function assertTrue( b:Bool, ?c : PosInfos ) : Void {
@@ -89,4 +103,13 @@ class TestCase #if mt_build implements mt.Protect, #end implements haxe.Public  
 		}
 	}
 
+	function assertDotEquals<T>( expected: T , actual: T,  ?c : PosInfos ) : Void 	{
+		currentTest.done = true;
+		if (untyped !actual.equals(expected)){
+			currentTest.success = false;
+			currentTest.error   = "left side: '" + expected + "' right side: '" + actual + "'";
+			currentTest.posInfos = c;
+			throw currentTest;
+		}
+	}
 }

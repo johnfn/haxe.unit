@@ -35,10 +35,9 @@ class TestRunner {
 	static var tf : flash.TextField = null;
 #end
 
-	public static dynamic function print( v : Dynamic, color : Bool = false ) untyped {
-
-    var redTextFormat: flash.text.TextFormat = new flash.text.TextFormat();
-    redTextFormat.color = 0x0000FF;
+	public static dynamic function print( v : Dynamic, color : UInt = 0x000000 ) untyped {
+    var textFormat: flash.text.TextFormat = new flash.text.TextFormat();
+    textFormat.color = color;
 
 		#if flash9
 			if( tf == null ) {
@@ -49,14 +48,17 @@ class TestRunner {
 				flash.Lib.current.addChild(tf);
 			}
 
-      if (color) {
-        var oldSize : Int = tf.length;
-        tf.appendText(v);
-        var newSize : Int = tf.length;
+      var oldSize : Int = tf.length;
+      tf.appendText(v);
+      var newSize : Int = tf.length;
 
-        tf.setTextFormat(redTextFormat, oldSize, newSize);
-      } else {
-        tf.appendText(v);
+      tf.setTextFormat(textFormat, oldSize, newSize);
+
+      if (v.indexOf("Test.hx") != -1) {
+        var startIdx: Int = v.indexOf("Test.hx");
+
+        textFormat.color = 0xFF0000;
+        tf.setTextFormat(textFormat, oldSize + v.lastIndexOf('\n', startIdx) , oldSize + v.indexOf('\n', startIdx));
       }
 
 		#elseif flash
@@ -96,7 +98,7 @@ class TestRunner {
 	}
 
 	private static function customTrace( v, ?p : haxe.PosInfos ) {
-		print(p.fileName+":"+p.lineNumber+": "+Std.string(v)+"\n", true);
+		print(p.fileName+":"+p.lineNumber+": "+Std.string(v)+"\n", 0x0000FF);
 	}
 
 	public function new() {
@@ -109,6 +111,9 @@ class TestRunner {
 	}
 
 	public function run() : Bool {
+#if flash9
+    //flash.Lib.current.height = 700;
+#end
 		result = new TestResult();
 		for ( c in cases ){
 			runCase(c);
