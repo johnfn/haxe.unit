@@ -103,6 +103,16 @@ class TestCase #if mt_build implements mt.Protect, #end implements haxe.Public  
 		}
 	}
 
+	function assertNotEquals<T>( expected: T , actual: T,  ?c : PosInfos ) : Void 	{
+		currentTest.done = true;
+		if (actual == expected){
+			currentTest.success = false;
+			currentTest.error   = "left side: '" + expected + "' right side: '" + actual + "'";
+			currentTest.posInfos = c;
+			throw currentTest;
+		}
+	}
+
 	function assertNotDotEquals<T>( expected: T , actual: T,  ?c : PosInfos ) : Void 	{
 		currentTest.done = true;
 		if (untyped actual.equals(expected)){
