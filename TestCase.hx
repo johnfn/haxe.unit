@@ -37,6 +37,12 @@ class TestCase #if mt_build implements mt.Protect, #end implements haxe.Public  
   public function afterAll() : Void {
   }
 
+  public function globalSetup(): Void {
+  }
+
+  public function globalTeardown(): Void {
+  }
+
 	public function setup() : Void {
 	}
 

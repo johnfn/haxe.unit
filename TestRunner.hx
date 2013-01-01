@@ -131,10 +131,14 @@ class TestRunner {
 
 		print( "Class: "+Type.getClassName(cl)+" ");
 
+    t.globalSetup();
+
 		for ( f in fields ){
 			var fname = f;
 			var field = Reflect.field(t, f);
-			if ( StringTools.startsWith(fname,"test") && Reflect.isFunction(field) ){
+      var expectedFail:Bool = StringTools.startsWith(fname, "failing");
+
+			if ((expectedFail || StringTools.startsWith(fname,"test")) && Reflect.isFunction(field) ){
 				t.currentTest = new TestStatus();
 				t.currentTest.classname = Type.getClassName(cl);
 				t.currentTest.method = fname;
@@ -152,8 +156,12 @@ class TestRunner {
 						print("W");
 					}
 				}catch ( e : TestStatus ){
-					print("F");
-					t.currentTest.backtrace = haxe.Stack.toString(haxe.Stack.exceptionStack());
+          if (expectedFail) {
+            print("-");
+          } else {
+            print("F");
+            t.currentTest.backtrace = haxe.Stack.toString(haxe.Stack.exceptionStack());
+          }
 				}catch ( e : Dynamic ){
 					print("E");
 					#if js
@@ -171,6 +179,8 @@ class TestRunner {
 				t.tearDown();
 			}
 		}
+
+    t.globalTeardown();
 
 		print("\n");
 		haxe.Log.trace = old;
