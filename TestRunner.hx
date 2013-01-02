@@ -35,11 +35,11 @@ class TestRunner {
 	static var tf : flash.TextField = null;
 #end
 
-	public static dynamic function print( v : Dynamic, color : UInt = 0x000000 ) untyped {
-    var textFormat: flash.text.TextFormat = new flash.text.TextFormat();
-    textFormat.color = color;
-
+	public static dynamic function print( v : Dynamic, color : Int = 0x000000 ) untyped {
 		#if flash9
+      var textFormat: flash.text.TextFormat = new flash.text.TextFormat();
+      textFormat.color = color;
+
 			if( tf == null ) {
 				tf = new flash.text.TextField();
 				tf.width = flash.Lib.current.stage.stageWidth;
