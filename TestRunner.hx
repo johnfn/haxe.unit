@@ -114,6 +114,7 @@ class TestRunner {
 
 	public function run() : Bool {
     //TODO - bleh, toss in async support here too
+    //TODO - async setup (and teardown..?)
 
 		result = new TestResult();
 		for ( c in cases ){
@@ -129,30 +130,39 @@ class TestRunner {
 
     if (field == null) return;
 
-    var expectedFail:Bool = f.startsWith("failing");
-
-    if ((expectedFail || f.startsWith("test")) && Reflect.isFunction(field) ){
+    if (Reflect.isFunction(field)){
       test.currentTest = new TestStatus();
       test.currentTest.classname = Type.getClassName(Type.getClass(test));
       test.currentTest.method = f;
       test.setup();
 
-      Reflect.callMethod(test, field, new Array());
-
-      if (test.currentTest.success) {
-        if (test.currentTest.done){
-          test.currentTest.success = true;
-          print(".");
+      function finishTest() {
+        if (test.currentTest.success) {
+          if (test.currentTest.done){
+            test.currentTest.success = true;
+            print(".");
+          } else {
+            test.currentTest.success = false;
+            test.currentTest.error = "(warning) no assert";
+            print("W");
+          }
         } else {
-          test.currentTest.success = false;
-          test.currentTest.error = "(warning) no assert";
-          print("W");
+          print("F");
         }
-      } else {
-        print("F");
+
+        result.add(test.currentTest);
+        test.tearDown();
       }
-      result.add(test.currentTest);
-      test.tearDown();
+
+      if (cb == null) {
+        Reflect.callMethod(test, field, []);
+        finishTest();
+      } else {
+        Reflect.callMethod(test, field, [function() {
+          finishTest();
+          cb();
+        }]);
+      }
     }
   }
 
@@ -172,7 +182,7 @@ class TestRunner {
 		for (f in fields){
       if (f.startsWith("async")) {
         asyncTests.push(f);
-      } else {
+      } else if (f.startsWith("test")) {
         runSingleTest(f, t);
       }
 		}
