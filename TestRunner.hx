@@ -131,7 +131,14 @@ class TestRunner {
       var c: TestCase = cases[currentCase++];
 
       if (Type.getInstanceFields(Type.getClass(c)).indexOf("globalAsyncSetup") != -1) {
+        var alreadyCalled: Bool = false;
         Reflect.callMethod(c, "globalAsyncSetup", [function() {
+          if (alreadyCalled) {
+            trace("you're calling the callback more than once. bad times!");
+            return;
+          }
+
+          alreadyCalled = true;
           runCase(c);
           recursivelyRunCases();
         }]);
@@ -155,12 +162,12 @@ class TestRunner {
   }
 
   /* Run a single test (function). */
-  function runSingleTest(f: String, test: TestCase, cb: Void -> Void = null): Void {
+  function runSingleTest(f: String, test: TestCase): Void {
     var field = Reflect.field(test, f);
 
     if (field == null) return;
 
-    if (Reflect.isFunction(field)){
+    if (Reflect.isFunction(field)) {
       test.currentTest = new TestStatus();
       test.currentTest.classname = Type.getClassName(Type.getClass(test));
       test.currentTest.method = f;
@@ -184,15 +191,8 @@ class TestRunner {
         test.tearDown();
       }
 
-      if (cb == null) {
-        Reflect.callMethod(test, field, []);
-        showResult();
-      } else {
-        Reflect.callMethod(test, field, [function() {
-          showResult();
-          cb();
-        }]);
-      }
+      Reflect.callMethod(test, field, []);
+      showResult();
     }
   }
 
@@ -208,34 +208,18 @@ class TestRunner {
 
     t.globalSetup();
 
-    var testCount: Int = 0;
-
-    for (f in fields) {
-      if (f.startsWith("test")) {
-        ++testCount;
-      }
-    }
-
-    function finishTest() {
-      --testCount;
-      if (testCount > 0) return;
-
-      // done function
-      t.globalTeardown();
-
-      print(t.output + "\n");
-      haxe.Log.trace = old;
-
-      caseComplete();
-    }
-
-    var asyncTests: Array<String> = [];
-
 		for (f in fields) {
       if (f.startsWith("test")) {
         runSingleTest(f, t);
-        finishTest();
       }
 		}
+
+    // done function
+    t.globalTeardown();
+
+    print(t.output + "\n");
+    haxe.Log.trace = old;
+
+    caseComplete();
 	}
 }
