@@ -38,7 +38,7 @@ class TestStatus {
 
 	public function new() 	{
 		done = false;
-		success = false;
+		success = true;
 	}
 
 }

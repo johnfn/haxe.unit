@@ -24,6 +24,7 @@
  */
 package haxe.unit;
 import haxe.PosInfos;
+import haxe.Stack;
 
 class TestCase #if mt_build implements mt.Protect, #end implements haxe.Public  {
 	public var currentTest : TestStatus;
@@ -85,7 +86,7 @@ class TestCase #if mt_build implements mt.Protect, #end implements haxe.Public  
 			currentTest.success = false;
 			currentTest.error   = "expected true but was false";
 			currentTest.posInfos = c;
-			throw currentTest;
+      currentTest.backtrace = haxe.Stack.toString(haxe.Stack.callStack());
 		}
 	}
 
@@ -95,7 +96,7 @@ class TestCase #if mt_build implements mt.Protect, #end implements haxe.Public  
 			currentTest.success = false;
 			currentTest.error   = "expected false but was true";
 			currentTest.posInfos = c;
-			throw currentTest;
+      currentTest.backtrace = haxe.Stack.toString(haxe.Stack.callStack());
 		}
 	}
 
@@ -105,7 +106,7 @@ class TestCase #if mt_build implements mt.Protect, #end implements haxe.Public  
 			currentTest.success = false;
 			currentTest.error   = "left side: '" + expected + "' right side: '" + actual + "'";
 			currentTest.posInfos = c;
-			throw currentTest;
+      currentTest.backtrace = haxe.Stack.toString(haxe.Stack.callStack());
 		}
 	}
 
@@ -115,7 +116,7 @@ class TestCase #if mt_build implements mt.Protect, #end implements haxe.Public  
 			currentTest.success = false;
 			currentTest.error   = "left side: '" + expected + "' right side: '" + actual + "'";
 			currentTest.posInfos = c;
-			throw currentTest;
+      currentTest.backtrace = haxe.Stack.toString(haxe.Stack.callStack());
 		}
 	}
 
@@ -125,7 +126,7 @@ class TestCase #if mt_build implements mt.Protect, #end implements haxe.Public  
 			currentTest.success = false;
 			currentTest.error   = "left side: '" + expected + "' right side: '" + actual + "'";
 			currentTest.posInfos = c;
-			throw currentTest;
+      currentTest.backtrace = haxe.Stack.toString(haxe.Stack.callStack());
 		}
 	}
 
@@ -135,7 +136,7 @@ class TestCase #if mt_build implements mt.Protect, #end implements haxe.Public  
 			currentTest.success = false;
 			currentTest.error   = "left side: '" + expected + "' right side: '" + actual + "'";
 			currentTest.posInfos = c;
-			throw currentTest;
+      currentTest.backtrace = haxe.Stack.toString(haxe.Stack.callStack());
 		}
 	}
 }

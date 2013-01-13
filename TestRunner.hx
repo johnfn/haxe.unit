@@ -25,6 +25,8 @@
 package haxe.unit;
 import Reflect;
 
+using StringTools;
+
 class TestRunner {
 	var result : TestResult;
 	var cases  : List<TestCase>;
@@ -111,9 +113,8 @@ class TestRunner {
 	}
 
 	public function run() : Bool {
-#if flash9
-    //flash.Lib.current.height = 700;
-#end
+    //TODO - bleh, toss in async support here too
+
 		result = new TestResult();
 		for ( c in cases ){
 			runCase(c);
@@ -122,67 +123,77 @@ class TestRunner {
 		return result.success;
 	}
 
-	function runCase( t:TestCase ) : Void 	{
-		var old = haxe.Log.trace;
-		haxe.Log.trace = customTrace;
+  /* Run a single test (function). */
+  function runSingleTest(f: String, test: TestCase, cb: Void -> Void = null): Void {
+    var field = Reflect.field(test, f);
 
+    if (field == null) return;
+
+    var expectedFail:Bool = f.startsWith("failing");
+
+    if ((expectedFail || f.startsWith("test")) && Reflect.isFunction(field) ){
+      test.currentTest = new TestStatus();
+      test.currentTest.classname = Type.getClassName(Type.getClass(test));
+      test.currentTest.method = f;
+      test.setup();
+
+      Reflect.callMethod(test, field, new Array());
+
+      if (test.currentTest.success) {
+        if (test.currentTest.done){
+          test.currentTest.success = true;
+          print(".");
+        } else {
+          test.currentTest.success = false;
+          test.currentTest.error = "(warning) no assert";
+          print("W");
+        }
+      } else {
+        print("F");
+      }
+      result.add(test.currentTest);
+      test.tearDown();
+    }
+  }
+
+  /* tests every method in a class. */
+	function runCase(t: TestCase): Void	{
+		var old = haxe.Log.trace;
 		var cl = Type.getClass(t);
 		var fields = Type.getInstanceFields(cl);
 
+		haxe.Log.trace = customTrace;
 		print( "Class: "+Type.getClassName(cl)+" ");
 
     t.globalSetup();
 
-		for ( f in fields ){
-			var fname = f;
-			var field = Reflect.field(t, f);
-      var expectedFail:Bool = StringTools.startsWith(fname, "failing");
+    var asyncTests: Array<String> = [];
 
-			if ((expectedFail || StringTools.startsWith(fname,"test")) && Reflect.isFunction(field) ){
-				t.currentTest = new TestStatus();
-				t.currentTest.classname = Type.getClassName(cl);
-				t.currentTest.method = fname;
-				t.setup();
-
-				try {
-					Reflect.callMethod(t, field, new Array());
-
-					if( t.currentTest.done ){
-						t.currentTest.success = true;
-						print(".");
-					}else{
-						t.currentTest.success = false;
-						t.currentTest.error = "(warning) no assert";
-						print("W");
-					}
-				}catch ( e : TestStatus ){
-          if (expectedFail) {
-            print("-");
-          } else {
-            print("F");
-            t.currentTest.backtrace = haxe.Stack.toString(haxe.Stack.exceptionStack());
-          }
-				}catch ( e : Dynamic ){
-					print("E");
-					#if js
-					if( e.message != null ){
-						t.currentTest.error = "exception thrown : "+e+" ["+e.message+"]";
-					}else{
-						t.currentTest.error = "exception thrown : "+e;
-					}
-					#else
-					t.currentTest.error = "exception thrown : "+e;
-					#end
-					t.currentTest.backtrace = haxe.Stack.toString(haxe.Stack.exceptionStack());
-				}
-				result.add(t.currentTest);
-				t.tearDown();
-			}
+		for (f in fields){
+      if (f.startsWith("async")) {
+        asyncTests.push(f);
+      } else {
+        runSingleTest(f, t);
+      }
 		}
 
-    t.globalTeardown();
+    function recursivelyTest(testsLeft: Array<String>, complete: Void -> Void) {
+      if (testsLeft.length == 0) {
+        complete();
+        return;
+      }
 
-		print("\n");
-		haxe.Log.trace = old;
+      runSingleTest(testsLeft[0], t, function() {
+        recursivelyTest(testsLeft.slice(1), complete);
+      });
+    }
+    
+    recursivelyTest(asyncTests, function() {
+      // done function
+      t.globalTeardown();
+
+      print("\n");
+      haxe.Log.trace = old;
+    });
 	}
 }
