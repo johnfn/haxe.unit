@@ -26,6 +26,7 @@ package haxe.unit;
 import Reflect;
 
 using StringTools;
+using Lambda;
 
 class TestRunner {
 	var result : TestResult;
@@ -121,7 +122,13 @@ class TestRunner {
     casesLeft = cases.length;
 
 		for (c in cases) {
-			runCase(c);
+      if (Type.getInstanceFields(Type.getClass(c)).indexOf("globalAsyncSetup") != -1) {
+        Reflect.callMethod(c, "globalAsyncSetup", [function() {
+          runCase(c);
+        }]);
+      } else {
+        runCase(c);
+      }
 		}
 
 		return result.success;
@@ -212,7 +219,7 @@ class TestRunner {
 
     var asyncTests: Array<String> = [];
 
-		for (f in fields){
+		for (f in fields) {
       if (f.startsWith("async")) {
         runSingleTest(f, t, finishTest);
       } else if (f.startsWith("test")) {

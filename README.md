@@ -7,13 +7,15 @@ This is the Haxe unit testing framework, with some improvements.
 * The textbox wordwraps by default (so you can read it)
 * `trace()` output lines are colored blue
 * The line of the test that triggered the error is colored red
+* adds `globalSetup` - setup that is run once per class of tests
+* adds `globalTeardown` - analogous to `globalSetup`
 * adds `assertNotEquals`
 * adds `assertThrows`
 * adds `assertDoesNotThrow`
 * adds `assertDotEquals` (same as `assertEquals`, but does comparisons with .equals() rather than ==)
 * adds `assertNotDotEquals`
 * adds `async*` - methods that start with `async` are treated as async methods. More explanation below.
-
+* adds `globalAsyncSetup` - same as `globalSetup`, except with async semantics as seen below.
 
 ## Async methods
 
