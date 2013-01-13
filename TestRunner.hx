@@ -30,6 +30,7 @@ using StringTools;
 class TestRunner {
 	var result : TestResult;
 	var cases  : List<TestCase>;
+  var casesLeft: Int = 0;
 
 #if flash9
 	static var tf : flash.text.TextField = null;
@@ -117,12 +118,22 @@ class TestRunner {
     //TODO - async setup (and teardown..?)
 
 		result = new TestResult();
-		for ( c in cases ){
+    casesLeft = cases.length;
+
+		for (c in cases) {
 			runCase(c);
 		}
-		print(result.toString());
+
 		return result.success;
 	}
+
+  public function testComplete() {
+    casesLeft--;
+
+    if (casesLeft == 0) {
+      print(result.toString());
+    }
+  }
 
   /* Run a single test (function). */
   function runSingleTest(f: String, test: TestCase, cb: Void -> Void = null): Void {
@@ -140,14 +151,14 @@ class TestRunner {
         if (test.currentTest.success) {
           if (test.currentTest.done){
             test.currentTest.success = true;
-            print(".");
+            test.output += ".";
           } else {
             test.currentTest.success = false;
             test.currentTest.error = "(warning) no assert";
-            print("W");
+            test.output += "W";
           }
         } else {
-          print("F");
+          test.output += "F";
         }
 
         result.add(test.currentTest);
@@ -173,7 +184,8 @@ class TestRunner {
 		var fields = Type.getInstanceFields(cl);
 
 		haxe.Log.trace = customTrace;
-		print( "Class: "+Type.getClassName(cl)+" ");
+
+    t.output += "Class: "+Type.getClassName(cl)+" ";
 
     t.globalSetup();
 
@@ -202,8 +214,10 @@ class TestRunner {
       // done function
       t.globalTeardown();
 
-      print("\n");
+      print(t.output + "\n");
       haxe.Log.trace = old;
+
+      testComplete();
     });
 	}
 }

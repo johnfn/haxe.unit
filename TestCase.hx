@@ -28,8 +28,10 @@ import haxe.Stack;
 
 class TestCase #if mt_build implements mt.Protect, #end implements haxe.Public  {
 	public var currentTest : TestStatus;
+  public var output: String;
 
 	public function new( ) {
+    output = "";
 	}
 
   public function beforeAll() : Void {
