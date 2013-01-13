@@ -127,7 +127,7 @@ class TestRunner {
 		return result.success;
 	}
 
-  public function testComplete() {
+  public function caseComplete() {
     casesLeft--;
 
     if (casesLeft == 0) {
@@ -147,7 +147,7 @@ class TestRunner {
       test.currentTest.method = f;
       test.setup();
 
-      function finishTest() {
+      function showResult() {
         if (test.currentTest.success) {
           if (test.currentTest.done){
             test.currentTest.success = true;
@@ -167,10 +167,10 @@ class TestRunner {
 
       if (cb == null) {
         Reflect.callMethod(test, field, []);
-        finishTest();
+        showResult();
       } else {
         Reflect.callMethod(test, field, [function() {
-          finishTest();
+          showResult();
           cb();
         }]);
       }
@@ -189,35 +189,36 @@ class TestRunner {
 
     t.globalSetup();
 
-    var asyncTests: Array<String> = [];
+    var testCount: Int = 0;
 
-		for (f in fields){
-      if (f.startsWith("async")) {
-        asyncTests.push(f);
-      } else if (f.startsWith("test")) {
-        runSingleTest(f, t);
+    for (f in fields) {
+      if (f.startsWith("async") || f.startsWith("test")) {
+        ++testCount;
       }
-		}
-
-    function recursivelyTest(testsLeft: Array<String>, complete: Void -> Void) {
-      if (testsLeft.length == 0) {
-        complete();
-        return;
-      }
-
-      runSingleTest(testsLeft[0], t, function() {
-        recursivelyTest(testsLeft.slice(1), complete);
-      });
     }
-    
-    recursivelyTest(asyncTests, function() {
+
+    function finishTest() {
+      --testCount;
+      if (testCount > 0) return;
+
       // done function
       t.globalTeardown();
 
       print(t.output + "\n");
       haxe.Log.trace = old;
 
-      testComplete();
-    });
+      caseComplete();
+    }
+
+    var asyncTests: Array<String> = [];
+
+		for (f in fields){
+      if (f.startsWith("async")) {
+        runSingleTest(f, t, finishTest);
+      } else if (f.startsWith("test")) {
+        runSingleTest(f, t);
+        finishTest();
+      }
+		}
 	}
 }
