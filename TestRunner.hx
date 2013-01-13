@@ -199,7 +199,7 @@ class TestRunner {
     var testCount: Int = 0;
 
     for (f in fields) {
-      if (f.startsWith("async") || f.startsWith("test")) {
+      if (f.startsWith("test")) {
         ++testCount;
       }
     }
@@ -220,9 +220,7 @@ class TestRunner {
     var asyncTests: Array<String> = [];
 
 		for (f in fields) {
-      if (f.startsWith("async")) {
-        runSingleTest(f, t, finishTest);
-      } else if (f.startsWith("test")) {
+      if (f.startsWith("test")) {
         runSingleTest(f, t);
         finishTest();
       }

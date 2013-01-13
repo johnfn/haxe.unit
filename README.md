@@ -14,21 +14,22 @@ This is the Haxe unit testing framework, with some improvements.
 * adds `assertDoesNotThrow`
 * adds `assertDotEquals` (same as `assertEquals`, but does comparisons with .equals() rather than ==)
 * adds `assertNotDotEquals`
-* adds `async*` - methods that start with `async` are treated as async methods. More explanation below.
 * adds `globalAsyncSetup` - same as `globalSetup`, except with async semantics as seen below.
 
 ## Async methods
 
 Sometimes, we have to deal with async methods. Most of the time, it devolves into callback soup. Fortunately, that's not the case here.
 
-If your method requires a callback, start it with `async` and have it take a parameter called `done`. When the async method has finished, have it call `done()`. That's it!
+If you need to do some asynchronous setup, call your method `asyncGlobalSetup`, and have it take a parameter called `done`. When the async method has finished, have it call `done()`. That's it!
 
 Here's an example if you don't believe it's as simple as it sounds.
 
-    function asyncWaitAWhileThenAssertOnePlusOneEqualsTwo(done: Void -> Void) {
+    function asyncGlobalSetup(done: Void -> Void) {
       haxe.Timer.delay(function() {
-          assertEquals(1 + 1, 2);
+          nme.Lib.current.stage.addChild(new MovieClip());
 
           done();
       }, 1000);
     }
+
+`haxe.unit` may run your test classes out of order - if one of them has to do some asynchronous loading, it'll save time by running other tests in the meantime. However, it will always run a full class of tests before moving on to the next one. This is so that you don't have to think very hard to avoid race conditions. :)
