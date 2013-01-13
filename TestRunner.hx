@@ -30,7 +30,7 @@ using Lambda;
 
 class TestRunner {
 	var result : TestResult;
-	var cases  : List<TestCase>;
+	var cases  : Array<TestCase>;
   var casesLeft: Int = 0;
 
 #if flash9
@@ -107,11 +107,11 @@ class TestRunner {
 
 	public function new() {
 		result = new TestResult();
-		cases = new List();
+		cases = new Array();
 	}
 
 	public function add( c:TestCase ) : Void{
-		cases.add(c);
+		cases.push(c);
 	}
 
 	public function run() : Bool {
@@ -120,16 +120,28 @@ class TestRunner {
 
 		result = new TestResult();
     casesLeft = cases.length;
+    var currentCase: Int = 0;
 
-		for (c in cases) {
+    function recursivelyRunCases() {
+      if (currentCase == cases.length) {
+        //done
+        return;
+      }
+
+      var c: TestCase = cases[currentCase++];
+
       if (Type.getInstanceFields(Type.getClass(c)).indexOf("globalAsyncSetup") != -1) {
         Reflect.callMethod(c, "globalAsyncSetup", [function() {
           runCase(c);
+          recursivelyRunCases();
         }]);
       } else {
         runCase(c);
+        recursivelyRunCases();
       }
-		}
+    }
+
+    recursivelyRunCases();
 
 		return result.success;
 	}

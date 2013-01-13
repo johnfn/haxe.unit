@@ -31,5 +31,3 @@ Here's an example if you don't believe it's as simple as it sounds.
           done();
       }, 1000);
     }
-
-`haxe.unit` may run your test classes out of order - if one of them has to do some asynchronous loading, it'll save time by running other tests in the meantime. However, it will always run a full class of tests before moving on to the next one. This is so that you don't have to think very hard to avoid race conditions. :)
