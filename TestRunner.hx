@@ -128,22 +128,30 @@ class TestRunner {
         return;
       }
 
-      var c: TestCase = cases[currentCase++];
+      var currentCase: TestCase = cases[currentCase++];
 
-      if (Type.getInstanceFields(Type.getClass(c)).indexOf("globalAsyncSetup") != -1) {
+      if (Type.getInstanceFields(Type.getClass(currentCase)).indexOf("globalAsyncSetup") != -1 
+          && Reflect.isFunction(Reflect.field(currentCase, "globalAsyncSetup"))) {
         var alreadyCalled: Bool = false;
-        Reflect.callMethod(c, "globalAsyncSetup", [function() {
+        var fn: (Void -> Void) -> Void = untyped currentCase.globalAsyncSetup;
+        fn(function() {
           if (alreadyCalled) {
             trace("you're calling the callback more than once. bad times!");
             return;
           }
 
           alreadyCalled = true;
-          runCase(c);
+          runCase(currentCase);
           recursivelyRunCases();
-        }]);
+        });
+
+        haxe.Timer.delay(function() {
+          if (!alreadyCalled) {
+            trace("done callback probably never called in " + currentCase + " (or it's taking a long time).");
+          }
+        }, 1500);
       } else {
-        runCase(c);
+        runCase(currentCase);
         recursivelyRunCases();
       }
     }
