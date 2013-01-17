@@ -179,7 +179,7 @@ class TestRunner {
       test.currentTest = new TestStatus();
       test.currentTest.classname = Type.getClassName(Type.getClass(test));
       test.currentTest.method = f;
-      test.setup();
+      test.beforeEach();
 
       function showResult() {
         if (test.currentTest.success) {
@@ -196,7 +196,7 @@ class TestRunner {
         }
 
         result.add(test.currentTest);
-        test.tearDown();
+        test.afterEach();
       }
 
       Reflect.callMethod(test, field, []);

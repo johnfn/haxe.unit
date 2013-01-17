@@ -9,6 +9,8 @@ This is the Haxe unit testing framework, with some improvements.
 * The line of the test that triggered the error is colored red
 * adds `globalSetup` - setup that is run once per class of tests
 * adds `globalTeardown` - analogous to `globalSetup`
+* adds `beforeEach` - run before each individual function test
+* adds `afterEach` - analogous to `beforeEach`
 * adds `assertNotEquals`
 * adds `assertThrows`
 * adds `assertDoesNotThrow`

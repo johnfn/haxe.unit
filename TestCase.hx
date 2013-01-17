@@ -34,10 +34,10 @@ class TestCase #if mt_build implements mt.Protect, #end implements haxe.Public  
     output = "";
 	}
 
-  public function beforeAll() : Void {
+  public function beforeEach() : Void {
   }
 
-  public function afterAll() : Void {
+  public function afterEach() : Void {
   }
 
   public function globalSetup(): Void {
@@ -45,12 +45,6 @@ class TestCase #if mt_build implements mt.Protect, #end implements haxe.Public  
 
   public function globalTeardown(): Void {
   }
-
-	public function setup() : Void {
-	}
-
-	public function tearDown() : Void {
-	}
 
 	function print( v : Dynamic ) {
 		haxe.unit.TestRunner.print(v);
